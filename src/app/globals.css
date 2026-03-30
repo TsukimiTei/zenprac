@@ -221,3 +221,8 @@
 .animate-float-up {
   animation: float-up 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@keyframes zen-shimmer {
+  0%, 100% { background-position: 200% 0; }
+  50% { background-position: -100% 0; }
+}

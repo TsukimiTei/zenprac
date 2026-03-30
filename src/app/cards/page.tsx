@@ -329,13 +329,6 @@ export default function CardsPage() {
       </div>
 
       <BottomNav />
-
-      <style jsx global>{`
-        @keyframes zen-shimmer {
-          0%, 100% { background-position: 200% 0; }
-          50% { background-position: -100% 0; }
-        }
-      `}</style>
     </div>
   );
 }
