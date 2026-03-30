@@ -2,13 +2,12 @@ import { HiddenEval, EnlightenmentLevel } from '@/types';
 
 /**
  * Calculate final enlightenment level based on all rounds' evaluations
- * Uses "Peak + Trend" dual-track evaluation:
- * - SSR (顿悟): Any single round_score >= 9, OR spark 2+ times and last round >= 8
- *   → Works even with 1 round. 禅可以一句话的事。
- * - SR (渐悟): max >= 7 with spark, OR upward trend (needs 4+ rounds)
- *   → 1-round SR possible if score >= 7 and spark
- * - R (初触): At least 1 round with round_score >= 5
- * - N (未悟): All rounds below 5
+ *
+ * Stricter "Peak + Trend" dual-track evaluation:
+ * - SSR (顿悟): Single round >= 9, needs at least 2 rounds of dialogue
+ * - SR (渐悟): Sustained quality — needs 3+ user rounds, max >= 7, and either spark or upward trend
+ * - R (初触): At least 1 round >= 5, with 2+ user rounds
+ * - N (未悟): Default. Short/shallow sessions stay here.
  */
 export function calculateEnlightenmentLevel(evals: HiddenEval[]): EnlightenmentLevel {
   if (evals.length === 0) return 'N';
@@ -16,26 +15,34 @@ export function calculateEnlightenmentLevel(evals: HiddenEval[]): EnlightenmentL
   const scores = evals.map(e => e.round_score);
   const maxScore = Math.max(...scores);
   const sparkCount = evals.filter(e => e.spark).length;
-  const lastScore = scores[scores.length - 1];
+  const rounds = scores.length;
 
-  // SSR: Sudden enlightenment
-  if (maxScore >= 9) return 'SSR';
-  if (sparkCount >= 2 && lastScore >= 8) return 'SSR';
+  // SSR: Sudden enlightenment — requires genuine breakthrough
+  // Must have at least 2 eval rounds (meaning user engaged meaningfully)
+  if (rounds >= 2 && maxScore >= 9) return 'SSR';
+  if (rounds >= 3 && sparkCount >= 2 && scores[scores.length - 1] >= 8) return 'SSR';
 
-  // SR: Gradual enlightenment
-  if (scores.length >= 4) {
-    const mid = Math.floor(scores.length / 2);
-    const firstHalfAvg = scores.slice(0, mid).reduce((a, b) => a + b, 0) / mid;
-    const secondHalfAvg = scores.slice(mid).reduce((a, b) => a + b, 0) / (scores.length - mid);
-    if (secondHalfAvg > firstHalfAvg + 2 && maxScore >= 7) return 'SR';
+  // SR: Gradual enlightenment — requires sustained depth
+  // Must have at least 3 eval rounds
+  if (rounds >= 3) {
+    // Path 1: Upward trend with high peak
+    if (rounds >= 4) {
+      const mid = Math.floor(rounds / 2);
+      const firstHalfAvg = scores.slice(0, mid).reduce((a, b) => a + b, 0) / mid;
+      const secondHalfAvg = scores.slice(mid).reduce((a, b) => a + b, 0) / (rounds - mid);
+      if (secondHalfAvg > firstHalfAvg + 2 && maxScore >= 7) return 'SR';
+    }
+    // Path 2: High peak with spark — but need 3+ rounds to prove it's not a fluke
+    if (maxScore >= 8 && sparkCount >= 1) return 'SR';
   }
-  // Also SR if max >= 7 and spark appeared at least once
-  if (maxScore >= 7 && sparkCount >= 1) return 'SR';
 
-  // R: Initial touch
-  if (maxScore >= 5) return 'R';
+  // R: Initial touch — user engaged and showed some depth
+  // Need at least 2 rounds and a score >= 5
+  if (rounds >= 2 && maxScore >= 5) return 'R';
+  // Single round can get R only with score >= 6
+  if (rounds === 1 && maxScore >= 6) return 'R';
 
-  // N: Not yet
+  // N: Not yet — most sessions land here, and that's fine
   return 'N';
 }
 
