@@ -22,6 +22,7 @@ export const MASTERS: Record<MasterType, {
   };
   voiceId: string;
   voiceSpeed: number;
+  ambientSound: string; // URL to ambient loop audio
 }> = {
   shakyamuni: {
     name: '释迦牟尼',
@@ -42,6 +43,7 @@ export const MASTERS: Record<MasterType, {
     },
     voiceId: 'alloy',
     voiceSpeed: 0.82,
+    ambientSound: 'https://cdn.pixabay.com/audio/2024/11/04/audio_4956b4eff1.mp3', // temple bells
   },
   manjushri: {
     name: '文殊菩萨',
@@ -62,6 +64,7 @@ export const MASTERS: Record<MasterType, {
     },
     voiceId: 'echo',
     voiceSpeed: 0.88,
+    ambientSound: 'https://cdn.pixabay.com/audio/2022/02/23/audio_ea70ad08e0.mp3', // singing bowl
   },
   huineng: {
     name: '六祖慧能',
@@ -82,6 +85,7 @@ export const MASTERS: Record<MasterType, {
     },
     voiceId: 'fable',
     voiceSpeed: 0.95,
+    ambientSound: 'https://cdn.pixabay.com/audio/2022/08/31/audio_419263fc12.mp3', // forest stream birds
   },
 };
 

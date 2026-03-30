@@ -9,6 +9,7 @@ import { VoiceSpeaker } from '@/lib/voice';
 import VoiceButton from '@/components/session/VoiceButton';
 import SpeakerButton from '@/components/session/SpeakerButton';
 import { getDevFlags } from '@/components/DevPanel';
+import AmbientSound from '@/components/session/AmbientSound';
 
 interface Message {
   id: string;
@@ -216,6 +217,12 @@ function ChatContent() {
       className="min-h-screen flex flex-col relative overflow-hidden font-serif"
       style={{ backgroundColor: master.theme.bg }}
     >
+      {/* Ambient Sound — plays during meditation, fades with session */}
+      <AmbientSound
+        src={master.ambientSound}
+        playing={!isComplete && !isStarting}
+      />
+
       {/* Deep Space Background */}
       <div className="absolute inset-0 pointer-events-none z-0">
         <div 
