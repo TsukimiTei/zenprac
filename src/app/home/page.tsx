@@ -184,6 +184,42 @@ export default function HomePage() {
         </div>
       </main>
 
+      {/* Master selector — always visible, shows all 3 */}
+      <div className="relative z-20 flex items-center justify-center gap-8 md:gap-12 pb-28 md:pb-8">
+        {MASTER_KEYS.map((key, i) => {
+          const m = MASTERS[key];
+          const isActive = i === currentIndex;
+          return (
+            <button
+              key={key}
+              onClick={() => {
+                if (i === currentIndex || isTransitioning) return;
+                setIsTransitioning(true);
+                setCurrentIndex(i);
+                setTimeout(() => setIsTransitioning(false), 800);
+              }}
+              className="flex flex-col items-center gap-2 transition-all duration-500 group"
+            >
+              <div
+                className={`rounded-full transition-all duration-500 ${isActive ? 'w-2 h-2' : 'w-1 h-1 group-hover:w-1.5 group-hover:h-1.5'}`}
+                style={{
+                  backgroundColor: isActive ? m.theme.accent : '#57534e',
+                  boxShadow: isActive ? `0 0 8px ${m.theme.accent}60` : 'none',
+                }}
+              />
+              <span
+                className={`text-[10px] md:text-xs tracking-[0.2em] font-serif transition-all duration-500 ${
+                  isActive ? 'opacity-90' : 'opacity-30 group-hover:opacity-60'
+                }`}
+                style={{ color: isActive ? m.theme.accent : '#a8a29e' }}
+              >
+                {m.name}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* Minimalist Bottom Navigation */}
       <BottomNav />
     </div>

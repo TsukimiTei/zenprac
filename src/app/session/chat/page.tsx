@@ -320,16 +320,34 @@ function ChatContent() {
                     : 'text-center animate-ink-reveal'
                 }`}
               >
-                <p
-                  className={`${masterTextStyle} whitespace-pre-wrap ${
-                    msg.role === 'user' ? 'text-stone-400/80' : 'text-stone-200'
-                  }`}
-                  style={{
-                    textShadow: msg.role === 'assistant' ? `0 0 40px ${master.theme.primary}40` : 'none'
-                  }}
-                >
-                  {msg.content}
-                </p>
+                {/* Detect koan story separator ||| for two-part display */}
+                {msg.role === 'assistant' && msg.content.includes('|||') ? (
+                  <div className="space-y-8">
+                    <p
+                      className="text-base md:text-lg leading-[2.4] tracking-[0.08em] whitespace-pre-wrap text-stone-400/70 italic"
+                      style={{ textShadow: `0 0 20px ${master.theme.primary}15` }}
+                    >
+                      {msg.content.split('|||')[0].trim()}
+                    </p>
+                    <p
+                      className={`${masterTextStyle} whitespace-pre-wrap text-stone-200`}
+                      style={{ textShadow: `0 0 40px ${master.theme.primary}40` }}
+                    >
+                      {msg.content.split('|||')[1].trim()}
+                    </p>
+                  </div>
+                ) : (
+                  <p
+                    className={`${masterTextStyle} whitespace-pre-wrap ${
+                      msg.role === 'user' ? 'text-stone-400/80' : 'text-stone-200'
+                    }`}
+                    style={{
+                      textShadow: msg.role === 'assistant' ? `0 0 40px ${master.theme.primary}40` : 'none'
+                    }}
+                  >
+                    {msg.content}
+                  </p>
+                )}
               </div>
             </div>
             );

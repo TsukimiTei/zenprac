@@ -12,6 +12,7 @@ function SessionContent() {
   const masterType = searchParams.get('master') as MasterType;
   const [dailyQuestion, setDailyQuestion] = useState('');
   const [selectedMode, setSelectedMode] = useState<SessionMode | null>(null);
+  const [hoveredAlt, setHoveredAlt] = useState<SessionMode | null>(null);
 
   useEffect(() => {
     const q = getTodayQuestion();
@@ -25,132 +26,119 @@ function SessionContent() {
 
   const master = MASTERS[masterType];
 
-  const handleSelectMode = (mode: SessionMode) => {
+  const handleSelect = (mode: SessionMode) => {
+    if (selectedMode) return;
     setSelectedMode(mode);
     setTimeout(() => {
       router.push(`/session/chat?master=${masterType}&mode=${mode}`);
-    }, 1200);
+    }, 1000);
   };
 
   return (
-    <div 
-      className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center"
+    <div
+      className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center font-serif"
       style={{ backgroundColor: master.theme.bg }}
     >
-      {/* Deep Space Background with Master's Totem */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden">
-        {/* Abstract Visual Totem from Home Page (but fainter) */}
+      {/* Background totem (faint) */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
         {masterType === 'shakyamuni' && (
-          <div 
-            className="absolute w-[120vw] h-[120vw] max-w-[1000px] max-h-[1000px] rounded-full border-[1px] border-amber-500/10 animate-spin-slow opacity-40"
-            style={{
-              background: 'radial-gradient(circle, rgba(184,134,11,0.08) 0%, transparent 70%)',
-              boxShadow: '0 0 100px rgba(184,134,11,0.05), inset 0 0 100px rgba(184,134,11,0.05)'
-            }}
-          >
-            <div className="absolute inset-10 rounded-full border-[1px] border-amber-400/5 border-dashed animate-spin-slow" style={{ animationDirection: 'reverse' }} />
-          </div>
+          <div
+            className="absolute w-[100vw] h-[100vw] max-w-[800px] max-h-[800px] rounded-full border border-amber-500/10 animate-spin-slow opacity-30"
+            style={{ background: 'radial-gradient(circle, rgba(184,134,11,0.08) 0%, transparent 70%)' }}
+          />
         )}
         {masterType === 'manjushri' && (
-          <div className="absolute w-[100vw] h-[100vw] max-w-[800px] max-h-[800px] animate-float-sharp opacity-40">
-            <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 via-cyan-400/5 to-transparent backdrop-blur-sm border border-blue-400/10" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} />
+          <div className="absolute w-[80vw] h-[80vw] max-w-[600px] max-h-[600px] animate-float-sharp opacity-30">
+            <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 via-cyan-400/5 to-transparent border border-blue-400/10" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} />
           </div>
         )}
         {masterType === 'huineng' && (
-          <div 
-            className="absolute w-[110vw] h-[110vw] max-w-[900px] max-h-[900px] animate-morph opacity-40"
-            style={{
-              background: 'radial-gradient(circle at 30% 30%, rgba(107,142,35,0.12) 0%, rgba(143,188,143,0.03) 50%, transparent 80%)',
-              filter: 'blur(30px)'
-            }}
+          <div
+            className="absolute w-[90vw] h-[90vw] max-w-[700px] max-h-[700px] animate-morph opacity-30"
+            style={{ background: 'radial-gradient(circle at 30% 30%, rgba(107,142,35,0.1) 0%, transparent 70%)', filter: 'blur(30px)' }}
           />
         )}
-
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/rice-paper-2.png')] opacity-[0.05] mix-blend-overlay"></div>
       </div>
 
+      {/* Back */}
       <button
         onClick={() => router.push('/home')}
-        className="absolute top-12 left-8 md:left-12 text-stone-500 text-xs tracking-[0.4em] font-serif hover:text-stone-300 transition-colors z-20 opacity-60 hover:opacity-100"
+        className="absolute top-12 left-8 md:left-12 text-stone-500 text-xs tracking-[0.4em] hover:text-stone-300 transition-colors z-20"
       >
-        ← 归去
+        ←
       </button>
 
-      <div className="relative z-10 w-full max-w-4xl px-6 py-20 flex flex-col items-center">
-        
-        {/* Master Title */}
-        <div className={`text-center mb-12 md:mb-16 transition-all duration-1000 ${selectedMode ? 'opacity-0 -translate-y-10' : 'opacity-100 translate-y-0'}`}>
-          <h1 className="text-3xl md:text-5xl font-serif tracking-[0.3em] opacity-90" style={{ color: master.theme.accent, textShadow: `0 0 30px ${master.theme.primary}60` }}>
-            {master.name}
-          </h1>
-          <p className="text-stone-500 text-xs md:text-sm tracking-[0.4em] font-serif mt-6">
-            请择一法门
+      {/* Content */}
+      <div className={`relative z-10 flex flex-col items-center text-center px-8 transition-all duration-1000 ${selectedMode ? 'scale-105 opacity-0 blur-md' : ''}`}>
+
+        {/* Master name */}
+        <h1
+          className="text-4xl md:text-6xl tracking-[0.25em] mb-4"
+          style={{ color: master.theme.accent, textShadow: `0 0 40px ${master.theme.primary}30` }}
+        >
+          {master.name}
+        </h1>
+        <p className="text-stone-500 text-xs tracking-[0.4em] mb-20 md:mb-28">{master.title}</p>
+
+        {/* Primary action — 禅师出题 (the natural default) */}
+        <button
+          onClick={() => handleSelect('master_question')}
+          className="group relative mb-16 md:mb-20"
+        >
+          <span className="text-lg md:text-xl tracking-[0.5em] text-stone-300 group-hover:text-white transition-colors duration-500">
+            入座参禅
+          </span>
+          <div className="mt-3 h-px w-0 group-hover:w-full bg-gradient-to-r from-transparent via-stone-400 to-transparent transition-all duration-700 mx-auto" />
+          <p className="text-stone-600 text-[10px] tracking-[0.2em] mt-4 group-hover:text-stone-500 transition-colors">
+            {SESSION_MODES.master_question.description}
           </p>
+        </button>
+
+        {/* Divider */}
+        <div className="flex items-center gap-6 mb-12 md:mb-14">
+          <div className="w-12 h-px bg-stone-800" />
+          <span className="text-stone-600 text-[10px] tracking-[0.3em]">或</span>
+          <div className="w-12 h-px bg-stone-800" />
         </div>
 
-        {/* Modes List */}
-        <div className="w-full flex flex-col gap-6 md:gap-8 items-center">
-          {(Object.entries(SESSION_MODES) as [SessionMode, typeof SESSION_MODES[string]][]).map(
-            ([mode, config], index) => {
-              const isSelected = selectedMode === mode;
-              const isOtherSelected = selectedMode !== null && selectedMode !== mode;
+        {/* Alternative modes — compact, inline */}
+        <div className="flex items-center gap-8 md:gap-14">
+          <button
+            onClick={() => handleSelect('daily')}
+            onMouseEnter={() => setHoveredAlt('daily')}
+            onMouseLeave={() => setHoveredAlt(null)}
+            className="group text-center"
+          >
+            <span className="text-sm md:text-base tracking-[0.2em] text-stone-500 group-hover:text-stone-200 transition-colors duration-500">
+              {SESSION_MODES.daily.name}
+            </span>
+            <p className="text-stone-700 text-[9px] tracking-wider mt-2 group-hover:text-stone-500 transition-colors">
+              {SESSION_MODES.daily.description}
+            </p>
+          </button>
 
-              return (
-                <div 
-                  key={mode} 
-                  className={`transition-all duration-1000 ease-in-out w-full flex justify-center
-                    ${isOtherSelected ? 'opacity-0 blur-xl scale-90 h-0 overflow-hidden my-0' : 'opacity-100'}
-                    ${isSelected ? 'scale-110 md:scale-125 z-50 my-20' : ''}
-                  `}
-                  style={{ animationDelay: `${(index + 1) * 150}ms` }}
-                >
-                  <button
-                    onClick={() => handleSelectMode(mode)}
-                    disabled={selectedMode !== null}
-                    className={`group relative w-full max-w-md overflow-hidden rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-sm transition-all duration-700 animate-fade-in
-                      ${isSelected ? 'border-white/20 bg-white/[0.05] shadow-[0_0_50px_rgba(255,255,255,0.1)]' : 'hover:border-white/10 hover:bg-white/[0.04]'}
-                    `}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                    
-                    {/* Giant Watermark Icon */}
-                    <div className="absolute -right-8 -bottom-8 text-9xl opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-700 group-hover:scale-110 group-hover:-rotate-12 pointer-events-none">
-                      {config.icon}
-                    </div>
+          <div className="w-px h-6 bg-stone-800" />
 
-                    <div className="relative p-8 md:p-10 flex flex-col items-center text-center">
-                      <h3 
-                        className={`text-2xl md:text-3xl font-serif tracking-[0.3em] transition-all duration-700
-                          ${isSelected ? 'text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]' : 'text-stone-300 group-hover:text-white'}
-                        `}
-                      >
-                        {config.name}
-                      </h3>
-                      
-                      <div className={`mt-6 transition-all duration-700 ${isSelected ? 'opacity-0 h-0 overflow-hidden mt-0' : 'opacity-80 group-hover:opacity-100'}`}>
-                        <p className="text-stone-400 text-xs md:text-sm tracking-[0.2em] font-serif leading-loose">
-                          {config.description}
-                        </p>
-                        {mode === 'daily' && dailyQuestion && (
-                          <p className="text-stone-500 text-[10px] md:text-xs mt-4 tracking-[0.1em] font-serif italic">
-                            「{dailyQuestion}」
-                          </p>
-                        )}
-                      </div>
-                    </div>
+          <button
+            onClick={() => handleSelect('free')}
+            onMouseEnter={() => setHoveredAlt('free')}
+            onMouseLeave={() => setHoveredAlt(null)}
+            className="group text-center"
+          >
+            <span className="text-sm md:text-base tracking-[0.2em] text-stone-500 group-hover:text-stone-200 transition-colors duration-500">
+              {SESSION_MODES.free.name}
+            </span>
+            <p className="text-stone-700 text-[9px] tracking-wider mt-2 group-hover:text-stone-500 transition-colors">
+              {SESSION_MODES.free.description}
+            </p>
+          </button>
+        </div>
 
-                    {/* Deep Ripple Effect */}
-                    {isSelected && (
-                      <>
-                        <div className="absolute inset-0 rounded-3xl border border-white/30 animate-[ripple_1s_ease-out_forwards]" />
-                        <div className="absolute inset-0 rounded-3xl border border-white/10 animate-[ripple_1.5s_ease-out_forwards_0.2s]" />
-                      </>
-                    )}
-                  </button>
-                </div>
-              );
-            }
-          )}
+        {/* Daily question preview — appears when hovering 当日禅题 */}
+        <div className={`mt-10 max-w-sm transition-all duration-500 ${hoveredAlt === 'daily' && dailyQuestion ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}`}>
+          <p className="text-stone-500 text-[11px] tracking-wider leading-relaxed italic">
+            {dailyQuestion.replace(/\|\|\|/g, ' ')}
+          </p>
         </div>
       </div>
     </div>
